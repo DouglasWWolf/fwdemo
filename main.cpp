@@ -1,8 +1,10 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <cthread.h>
 #include <time.h>
+
+#include "cthread.h"
+#include "config_file.h"
 
 
 // In order to create a thread object, we derive from CThread
@@ -22,8 +24,14 @@ void CWorker::main(void* p1, void* p2, void* p3)
 
 CWorker thread1, thread2;
 
+
 int main()
 {
+    CConfigFile cf;
+
+    cf.read("test_spec.txt");
+    cf.dump_specs();
+/*
     srand(time(NULL));
 
     thread1.spawn();
@@ -31,7 +39,7 @@ int main()
 
     thread1.join();
     thread2.join();
-
+*/
 
     return 0;
 }
