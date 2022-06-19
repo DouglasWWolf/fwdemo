@@ -8,7 +8,7 @@
 // In order to create a thread object, we derive from CThread
 class CWorker : public CThread
 {
-	virtual void main(void* p1=0, void* p2=0, void* p3=0);
+    virtual void main(void* p1=0, void* p2=0, void* p3=0);
 };
 
 void CWorker::main(void* p1, void* p2, void* p3)
