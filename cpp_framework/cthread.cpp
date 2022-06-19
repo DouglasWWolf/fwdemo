@@ -9,10 +9,10 @@
 //=============================================================================
 struct CThreadSpawn
 {
-	CThread*	Object;
-	void		*P1, *P2, *P3;
-	CThreadSpawn(CThread* p, void* p1, void* p2, void* p3)
-	{Object = p; P1 = p1; P2 = p2; P3 = p3;}
+    CThread*    Object;
+    void        *P1, *P2, *P3;
+    CThreadSpawn(CThread* p, void* p1, void* p2, void* p3)
+    {Object = p; P1 = p1; P2 = p2; P3 = p3;}
 };
 //=============================================================================
 
@@ -33,18 +33,18 @@ int CThread::m_thread_count = 0;
 //=============================================================================
 void* launch_cthread(void* thread_ptr)
 {
-	// Turn the passed parameter into a pointer of the correct type
-	CThreadSpawn *p = (CThreadSpawn*)thread_ptr;
+    // Turn the passed parameter into a pointer of the correct type
+    CThreadSpawn *p = (CThreadSpawn*)thread_ptr;
 
-	// Spin up "main()" in our new thread.  When this returns, the thread
-	// is done executing
-	p->Object->main(p->P1, p->P2, p->P3);
+    // Spin up "main()" in our new thread.  When this returns, the thread
+    // is done executing
+    p->Object->main(p->P1, p->P2, p->P3);
 
-	// Free up the memory that was allocated during Spawn()
-	delete p;
+    // Free up the memory that was allocated during Spawn()
+    delete p;
 
-	// There's nothing to hand back to the caller
-	return nullptr;
+    // There's nothing to hand back to the caller
+    return nullptr;
 }
 //=============================================================================
 
@@ -53,10 +53,10 @@ void* launch_cthread(void* thread_ptr)
 //=============================================================================
 CThread::CThread()
 {
-	// The default Thread ID is the # of CThread objects that have been
-	// constructed previous to this one. A different Thread ID can be set
-	// manually by calling set_thread_id();
-	m_id = m_thread_count++;
+    // The default Thread ID is the # of CThread objects that have been
+    // constructed previous to this one. A different Thread ID can be set
+    // manually by calling set_thread_id();
+    m_id = m_thread_count++;
 }
 //=============================================================================
 
@@ -65,14 +65,14 @@ CThread::CThread()
 //=============================================================================
 int CThread::spawn(void* P1, void* P2, void* P3)
 {
-	// Create the parameter object that controls LaunchThread()
-	CThreadSpawn *params = new CThreadSpawn(this, P1, P2, P3);
+    // Create the parameter object that controls LaunchThread()
+    CThreadSpawn *params = new CThreadSpawn(this, P1, P2, P3);
 
-	// Spin up the thread
-	int ret = pthread_create(&m_thread, NULL, launch_cthread, (void*) params);
+    // Spin up the thread
+    int ret = pthread_create(&m_thread, NULL, launch_cthread, (void*) params);
 
-	// Tell the caller if it worked
-	return ret;
+    // Tell the caller if it worked
+    return ret;
 }
 //=============================================================================
 
@@ -81,8 +81,8 @@ int CThread::spawn(void* P1, void* P2, void* P3)
 //=============================================================================
 void CThread::join()
 {
-	// Join this thread
-	pthread_join(m_thread, NULL);
+    // Wait for this thread to complete
+    pthread_join(m_thread, NULL);
 }
 //=============================================================================
 
@@ -93,7 +93,7 @@ void CThread::join()
 //=============================================================================
 void CThread::terminate()
 {
-	pthread_exit(NULL);
+    pthread_exit(NULL);
 }
 //=============================================================================
 
@@ -106,8 +106,8 @@ void CThread::terminate()
 //=============================================================================
 void CThread::cancel(bool bWaitFlag)
 {
-	pthread_cancel(m_thread);
-	if (bWaitFlag) join();
+    pthread_cancel(m_thread);
+    if (bWaitFlag) join();
 }
 //=============================================================================
 
@@ -117,16 +117,16 @@ void CThread::cancel(bool bWaitFlag)
 //=============================================================================
 PCriticalSection::PCriticalSection()
 {
-	pthread_mutexattr_t attributes;
+    pthread_mutexattr_t attributes;
 
-	// Initialize the mutex attributes
-	pthread_mutexattr_init(&attributes);
+    // Initialize the mutex attributes
+    pthread_mutexattr_init(&attributes);
 
-	// We want a thread to be able to recursively lock this mutex
-	pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE);
+    // We want a thread to be able to recursively lock this mutex
+    pthread_mutexattr_settype(&attributes, PTHREAD_MUTEX_RECURSIVE);
 
-	// Create a recursive mutex
-	pthread_mutex_init(&m_mutex, &attributes);
+    // Create a recursive mutex
+    pthread_mutex_init(&m_mutex, &attributes);
 }
 //=============================================================================
 
