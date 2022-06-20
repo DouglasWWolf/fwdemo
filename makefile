@@ -52,7 +52,7 @@ CXXFLAGS =	\
 #-----------------------------------------------------------------------------
 # Special compile time flags for ARM targets
 #-----------------------------------------------------------------------------
-ARMFLAGS = -march=armv7-a -mfpu=neon -mfloat-abi=hard
+ARMFLAGS = -march=armv7-a -mfpu=neon -mfloat-abi=hard -Wno-psabi
 
 #-----------------------------------------------------------------------------
 # If there was no goal on the command line, the default goal depends
