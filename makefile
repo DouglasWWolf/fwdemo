@@ -176,4 +176,5 @@ depend:
 # DO NOT DELETE
 
 obj_x86/main.o: cpp_framework/cthread.h cpp_framework/config_file.h
+obj_x86/main.o: cpp_framework/netsock.h
 obj_x86/test_config.o: cpp_framework/config_file.h
