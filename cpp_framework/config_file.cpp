@@ -301,7 +301,11 @@ void CConfigFile::dump_specs()
 // Passed: key      = Key to look up.   Can optionally be fully scoped
 //         p_result = A pointer to the strvec where the specified key's values should be stored
 //
-// Returns: true if that key exists in our map, else false
+// On Entry: m_throw = 'true' if key-not-found error should throw an exception
+//
+// Returns: true if that key exists in our map
+//
+// If key doesn't exist in our map, this either returns false, or throws a std::runtime_error
 //==========================================================================================================
 bool CConfigFile::lookup(string key, strvec_t *p_result)
 {
@@ -320,14 +324,19 @@ bool CConfigFile::lookup(string key, strvec_t *p_result)
         // Do we have a key by that name?
         it = m_specs.find(key);
         
-        // If we don't, tell the caller
-        if (it == m_specs.end()) return false;
-
-        // If the caller wants the associate values, hand them to him
-        if (p_result) *p_result = it->second;
+        // If we have the specified key...
+        if (it != m_specs.end())
+        {
+            // If the caller wants the associate values, hand them to him
+            if (p_result) *p_result = it->second;
         
-        // Tell the caller that his key existed
-        return true;
+            // Tell the caller that his key existed
+            return true;
+        }
+
+        // If we get here, the key wasn't found in our map
+        if (p_result && m_throw_on_fail) throw runtime_error("config key '"+key+"' not found");
+        return false;
     }
 
     // Does the current section have a key by that name?
@@ -351,6 +360,9 @@ bool CConfigFile::lookup(string key, strvec_t *p_result)
     }
 
     // If we get here, we couldn't find that key in our specs
+    if (p_result && m_throw_on_fail) throw runtime_error("config key '"+key+"' not found");
+
+    // Tell the caller that we couldn't find that key in our specs
     return false;
 }
 //==========================================================================================================
@@ -358,9 +370,11 @@ bool CConfigFile::lookup(string key, strvec_t *p_result)
 
 //==========================================================================================================
 // Call this to fetch a variable-type configuration spec
+// 
+// If key doesn't exist in our map, this either returns false, or throws a std::runtime_error
 //==========================================================================================================
-void CConfigFile::getv(std::string key, const char* fmt, void* p1, void* p2, void* p3, void* p4, void* p5
-                                                       , void* p6, void* p7, void* p8, void* p9)
+bool CConfigFile::get(string key, string fmt, void* p1, void* p2, void* p3, void* p4, void* p5
+                                            , void* p6, void* p7, void* p8, void* p9)
 {
     strvec_t  values;
     char      format = 'i';
@@ -370,17 +384,13 @@ void CConfigFile::getv(std::string key, const char* fmt, void* p1, void* p2, voi
     void* output[] = {p1, p2, p3, p4, p5, p6, p7, p8, p9};
 
     // How many format-specifiers are there?
-    int format_count = strlen(fmt);
+    int format_count = fmt.size();
 
     // This is the current index into 'fmt'
     int format_index = -1;
 
     // Fetch the values assocated with this key
-    if (!lookup(key, &values))
-    {
-        if (m_throw_on_fail) throw runtime_error("config key '"+key+"' not found");
-        return;
-    }
+    if (!lookup(key, &values)) return false;
 
     // Loop through each value associated with this key
     for (int i=0; i<field_count; ++i)
@@ -414,6 +424,9 @@ void CConfigFile::getv(std::string key, const char* fmt, void* p1, void* p2, voi
         }
 
     }
+
+    // Tell the caller that all is well
+    return true;
 }
 //==========================================================================================================
 
@@ -421,33 +434,35 @@ void CConfigFile::getv(std::string key, const char* fmt, void* p1, void* p2, voi
 
 //==========================================================================================================
 // get() - These fetch up to 9 parameters of a given type
+//
+// If key doesn't exist in our map, these either return false, or throw a std::runtime_error
 //==========================================================================================================
-void CConfigFile::get(std::string key, int32_t* p1, int32_t* p2, int32_t* p3, int32_t* p4, int32_t* p5,
+bool CConfigFile::get(std::string key, int32_t* p1, int32_t* p2, int32_t* p3, int32_t* p4, int32_t* p5,
                                        int32_t* p6, int32_t* p7, int32_t* p8, int32_t* p9)
 {
-    getv(key, "i", p1, p2, p3, p4, p5, p6, p7, p8, p9);
+    return get(key, "i", p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
 
 
 
-void CConfigFile::get(std::string key, double* p1, double* p2, double* p3, double* p4, double* p5,
+bool CConfigFile::get(std::string key, double* p1, double* p2, double* p3, double* p4, double* p5,
                                        double* p6, double* p7, double* p8, double* p9)
 {
-    getv(key, "f", p1, p2, p3, p4, p5, p6, p7, p8, p9);
+    return get(key, "f", p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
 
 
-void CConfigFile::get(std::string key, string* p1, string* p2, string* p3, string* p4, string* p5,
+bool CConfigFile::get(std::string key, string* p1, string* p2, string* p3, string* p4, string* p5,
                                        string* p6, string* p7, string* p8, string* p9)
 {
-    getv(key, "s", p1, p2, p3, p4, p5, p6, p7, p8, p9);
+    return get(key, "s", p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
 
 
-void CConfigFile::get(std::string key, bool* p1, bool* p2, bool* p3, bool* p4, bool* p5,
+bool CConfigFile::get(std::string key, bool* p1, bool* p2, bool* p3, bool* p4, bool* p5,
                                        bool* p6, bool* p7, bool* p8, bool* p9)
 {
-    getv(key, "b", p1, p2, p3, p4, p5, p6, p7, p8, p9);
+    return get(key, "b", p1, p2, p3, p4, p5, p6, p7, p8, p9);
 }
 //==========================================================================================================
 
@@ -455,8 +470,10 @@ void CConfigFile::get(std::string key, bool* p1, bool* p2, bool* p3, bool* p4, b
 
 //==========================================================================================================
 // get() - Fetches a vector of values associated with the specified key
+//
+// If key doesn't exist in our map, these either return false, or throw a std::runtime_error
 //==========================================================================================================
-void CConfigFile::get(std::string key, std::vector<double> *p_result)
+bool CConfigFile::get(std::string key, std::vector<double> *p_result)
 {
     double      value;
     strvec_t    values;
@@ -465,11 +482,7 @@ void CConfigFile::get(std::string key, std::vector<double> *p_result)
     p_result->clear();
 
     // Fetch the values assocated with this key
-    if (!lookup(key, &values))
-    {
-        if (m_throw_on_fail) throw runtime_error("config key '"+key+"' not found");
-        return;
-    }
+    if (!lookup(key, &values)) return false;
 
     // For each string value that is associated with this key...
     for (auto& s : values)
@@ -480,9 +493,12 @@ void CConfigFile::get(std::string key, std::vector<double> *p_result)
         // Add append that value to the caller's result vector
         p_result->push_back(value);
     }
+
+    // Tell the caller that all is well
+    return true;
 }
 
-void CConfigFile::get(std::string key, std::vector<int32_t> *p_result)
+bool CConfigFile::get(std::string key, std::vector<int32_t> *p_result)
 {
     int32_t      value;
     strvec_t    values;
@@ -491,11 +507,7 @@ void CConfigFile::get(std::string key, std::vector<int32_t> *p_result)
     p_result->clear();
 
     // Fetch the values assocated with this key
-    if (!lookup(key, &values))
-    {
-        if (m_throw_on_fail) throw runtime_error("config key '"+key+"' not found");
-        return;
-    }
+    if (!lookup(key, &values)) return false;
 
     // For each string value that is associated with this key...
     for (auto& s : values)
@@ -506,9 +518,12 @@ void CConfigFile::get(std::string key, std::vector<int32_t> *p_result)
         // Add append that value to the caller's result vector
         p_result->push_back(value);
     }
+
+    // Tell the caller that all is well
+    return true;
 }
 
-void CConfigFile::get(std::string key, std::vector<string> *p_result)
+bool CConfigFile::get(std::string key, std::vector<string> *p_result)
 {
     string      value;
     strvec_t    values;
@@ -517,11 +532,7 @@ void CConfigFile::get(std::string key, std::vector<string> *p_result)
     p_result->clear();
 
     // Fetch the values assocated with this key
-    if (!lookup(key, &values))
-    {
-        if (m_throw_on_fail) throw runtime_error("config key '"+key+"' not found");
-        return;
-    }
+    if (!lookup(key, &values)) return false;
 
     // For each string value that is associated with this key...
     for (auto& s : values)
@@ -532,9 +543,12 @@ void CConfigFile::get(std::string key, std::vector<string> *p_result)
         // Add append that value to the caller's result vector
         p_result->push_back(value);
     }
+
+    // Tell the caller that all is well
+    return true;
 }
 
-void CConfigFile::get(std::string key, std::vector<bool> *p_result)
+bool CConfigFile::get(std::string key, std::vector<bool> *p_result)
 {
     bool        value;
     strvec_t    values;
@@ -543,11 +557,7 @@ void CConfigFile::get(std::string key, std::vector<bool> *p_result)
     p_result->clear();
 
     // Fetch the values assocated with this key
-    if (!lookup(key, &values))
-    {
-        if (m_throw_on_fail) throw runtime_error("config key '"+key+"' not found");
-        return;
-    }
+    if (!lookup(key, &values)) return false;
 
     // For each string value that is associated with this key...
     for (auto& s : values)
@@ -558,6 +568,33 @@ void CConfigFile::get(std::string key, std::vector<bool> *p_result)
         // Add append that value to the caller's result vector
         p_result->push_back(value);
     }
+
+    // Tell the caller that all is well
+    return true;
+}
+//==========================================================================================================
+
+
+//==========================================================================================================
+// get() - Fetches the script-spec that is associated with the specified key
+//
+// If key doesn't exist in our map, this either returns false, or throws a std::runtime_error
+//==========================================================================================================
+bool CConfigFile::get(string key, CConfigScript* p_script)
+{
+    strvec_t script_lines;
+
+    // Make the caller's script empty for the moment
+    p_script->make_empty();
+
+    // Fetch the values assocated with this key
+    if (!lookup(key, &script_lines)) return false;
+
+    // Fill in the caller's script
+    *p_script = script_lines;
+
+    // Tell the caller that all is well
+    return true;
 }
 //==========================================================================================================
 

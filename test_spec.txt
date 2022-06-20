@@ -1,0 +1,46 @@
+//==========================================================================================================
+// Configuration file for testing config_file.cpp
+//==========================================================================================================
+
+# Comments can also look like this.  
+# Any line beginning with '#' or with '//' is considered a comment.  Blank lines are also ignored
+
+# Here's a couple of integers
+voltage_range = 12, 32
+
+# Here's a floating point number
+pi = 3.14159
+
+# Integers can be expressed in hex as well as in decimal
+more_integers = 0x32, 0x7FFF
+
+# This is a string.   If it contains spaces, put it inside of quotes like this: "this has spaces"
+filename = /Some/file
+
+# Here's a boolean value
+flag = true
+
+# This is just a list of integers we might be interested in
+int_list = 1, 2, 42, 16, 32, 99, 127, 4, 59
+
+my_key = "This is the global my_key"
+some_value = 127
+
+[alpha]
+    my_key = "This is my_key in alpha"
+    some_value = 42
+[bravo]
+    my_key = "This is my key in beta"
+    some_value = 13
+[]
+
+# Here's a more complex config value with a string, a double, a bool, and an int
+complex = "Hello World", 36.72, true, 42
+
+# Here's a script-style spec
+serial_ports =
+{
+    /dev/ttyUSB1    115200
+    /dev/ttyUSB2     9600
+    /dev/ttyUSB3    19200
+}

@@ -1,5 +1,6 @@
 git add README.md
 git add '*.h' '*.cpp' 'cpp_framework/*.h' 'cpp_framework/*.cpp'
+git add test_spec.txt
 git add makefile push
 git commit -m "See History.h for changes"
 git push origin main

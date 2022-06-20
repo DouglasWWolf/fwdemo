@@ -17,12 +17,12 @@ class CConfigScript
 public:
 
     // After reset "get_next_line()" fetches the first line of the script
-    void        reset() {m_line_index = 0;}
+    void        rewind() {m_line_index = 0;}
 
     // Call this to begin processing the next line of the script
     bool        get_next_line(int *p_token_count = nullptr, std::string *p_text = nullptr);
 
-    std::string get_next_token(bool make_lower = true);
+    std::string get_next_token(bool make_lower = false);
     int32_t     get_next_int();
     double      get_next_float();
 
@@ -30,7 +30,7 @@ public:
     void        make_empty();
 
     // Overloading the '=' operator so we can assign a string vector
-    void        operator=(const std::vector<std::string> rhs) {m_script = rhs; reset();}
+    void        operator=(const std::vector<std::string> rhs) {m_script = rhs; rewind();}
 
 protected:
 
@@ -66,44 +66,47 @@ public:
 
     // Call this to fetch a variable-type configuration spec.
     // Can throw exception runtime_error
-    void    getv(std::string key, const char* fmt, void* p1=nullptr, void* p2=nullptr, void* p3=nullptr
-                                                 , void* p4=nullptr, void* p5=nullptr, void* p6=nullptr
-                                                 , void* p7=nullptr, void* p8=nullptr, void* p9=nullptr);
+    bool    get(std::string key, std::string fmt, void* p1=nullptr, void* p2=nullptr, void* p3=nullptr
+                                                , void* p4=nullptr, void* p5=nullptr, void* p6=nullptr
+                                                , void* p7=nullptr, void* p8=nullptr, void* p9=nullptr);
 
     // Call this to fetch integers.
     // Can throw exception runtime_error
-    void    get(std::string key, int32_t* p1=nullptr, int32_t* p2=nullptr, int32_t* p3=nullptr
+    bool    get(std::string key, int32_t* p1=nullptr, int32_t* p2=nullptr, int32_t* p3=nullptr
                                , int32_t* p4=nullptr, int32_t* p5=nullptr, int32_t* p6=nullptr
                                , int32_t* p7=nullptr, int32_t* p8=nullptr, int32_t* p9=nullptr);
 
     // Call this to fetch doubles
     // Can throw exception runtime_error
-    void    get(std::string key, double* p1=nullptr, double* p2=nullptr, double* p3=nullptr
+    bool    get(std::string key, double* p1=nullptr, double* p2=nullptr, double* p3=nullptr
                                , double* p4=nullptr, double* p5=nullptr, double* p6=nullptr
                                , double* p7=nullptr, double* p8=nullptr, double* p9=nullptr);
 
     // Call this to fetch stringss
     // Can throw exception runtime_error
-    void    get(std::string key, std::string* p1=nullptr, std::string* p2=nullptr, std::string* p3=nullptr
+    bool    get(std::string key, std::string* p1=nullptr, std::string* p2=nullptr, std::string* p3=nullptr
                                , std::string* p4=nullptr, std::string* p5=nullptr, std::string* p6=nullptr
                                , std::string* p7=nullptr, std::string* p8=nullptr, std::string* p9=nullptr);
 
     // Call this to fetch bools
     // Can throw exception runtime_error
-    void    get(std::string key, bool* p1=nullptr, bool* p2=nullptr, bool* p3=nullptr
+    bool    get(std::string key, bool* p1=nullptr, bool* p2=nullptr, bool* p3=nullptr
                                , bool* p4=nullptr, bool* p5=nullptr, bool* p6=nullptr
                                , bool* p7=nullptr, bool* p8=nullptr, bool* p9=nullptr);
 
     // Call these to fetch a vector of values
     // Can throw exception runtime_error
-    void    get(std::string, std::vector<int32_t    > *p_values);
-    void    get(std::string, std::vector<double     > *p_values);
-    void    get(std::string, std::vector<std::string> *p_values);
-    void    get(std::string, std::vector<bool       > *p_values);
+    bool    get(std::string, std::vector<int32_t    > *p_values);
+    bool    get(std::string, std::vector<double     > *p_values);
+    bool    get(std::string, std::vector<std::string> *p_values);
+    bool    get(std::string, std::vector<bool       > *p_values);
     
 
+    // Call this to fetch a script-spec from the config file    
+    bool    get(std::string, CConfigScript* p_script);
+
     // Tells the caller whether or not the specified spec-name exists
-    bool    exists(std::string key) {return lookup(key);}
+    bool    exists(std::string key) {return lookup(key, nullptr);}
 
     // Dumps out the m_specs in a human-readable form.  This is strictly for testing
     void    dump_specs();
@@ -117,7 +120,7 @@ protected:
     typedef std::vector< std::string > strvec_t;
 
     // Call this to fetch the values-vector associated with a key
-    bool    lookup(std::string key, strvec_t *p_result = nullptr);
+    bool    lookup(std::string key, strvec_t *p_result);
 
     // The section name to look for specs in
     std::string m_current_section;
