@@ -12,19 +12,13 @@ using namespace std;
 
 void test_config();
 
-NetSock sock, sock2;
+NetSock sock;
 
 int main()
 {
     if (!sock.create_server(12345))
     {
         printf(">>>>> CREATE FAILED <<<<<<\n");
-        exit(1);
-    }
-
-    if (!sock2.create_server(12345))
-    {
-        printf(">>>>> CREATE FAILED on sock2 <<<<<<\n");
         exit(1);
     }
 

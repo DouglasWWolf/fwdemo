@@ -48,6 +48,9 @@ public:
     // Returns the number of bytes available for reading 
     int     bytes_available();
 
+    // Call this to receive data from the socket
+    int     receive(void* buffer, int length, bool peek = false);
+
     // Call this to close this socket.  Safe to call if socket isn't open
     void    close();
 
