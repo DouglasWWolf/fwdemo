@@ -16,7 +16,7 @@ public:
     void    declare_switch(std::string name, clp_t swtype);
 
     // Call this to parse the command line
-    void    parse(int xargc, char** xargv);
+    void    parse(int argc, char** argv);
 
     // Call one of these to determine whether a given switch was used
     bool    has_switch(std::string name);

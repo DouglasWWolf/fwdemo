@@ -21,22 +21,22 @@ void CCmdLine::declare_switch(string name, clp_t swtype)
 //==========================================================================================================
 // parse() - Parses the command line
 //==========================================================================================================
-void CCmdLine::parse(int xargc, char** xargv)
+void CCmdLine::parse(int argc, char** argv)
 {
     int i = 0;
 
     // Fetch the name of this executable
-    const char* exe = xargv[0];
+    const char* exe = argv[0];
 
     // Clear any existing command line data we have
     m_switches.clear();
     m_args.clear();
 
     // Loop through every token on the command line...
-    while (xargv[++i])
+    while (argv[++i])
     {
         // Fetch this argument from the command line
-        const string& token = xargv[i];
+        const string& token = argv[i];
         
         // If this token isn't a switch, just append it to the list of non-switch arguments
         if (token[0] != '-')
@@ -62,7 +62,7 @@ void CCmdLine::parse(int xargc, char** xargv)
         string switch_param = "";
 
         // Find out if the user supplied a switch parameter
-        bool has_parameter = (xargv[i+1] && xargv[i+1][0] != '-');
+        bool has_parameter = (argv[i+1] && argv[i+1][0] != '-');
 
         // If this switch doesn't have a parameter and it was supposed to, complain to the user
         if (!has_parameter && swtype == CLP_MANDATORY)
@@ -74,7 +74,7 @@ void CCmdLine::parse(int xargc, char** xargv)
         // If there is a parameter, and this switch can accept one, fetch it
         if (has_parameter && (swtype == CLP_MANDATORY || swtype == CLP_OPTIONAL))
         {
-            switch_param = xargv[++i];
+            switch_param = argv[++i];
         }
 
         // Store the switch and it's parameter (if any)
@@ -96,11 +96,7 @@ bool CCmdLine::has_switch(string name, string *param)
     auto it = m_switches.find(name);
 
     // If the user didn't specify this switch on the command line, tell the caller
-    if (it == m_switches.end())
-    {
-        *param = "";
-        return false;
-    }
+    if (it == m_switches.end()) return false;
 
     // Otherwise, the user *did* use this switch.  Hand the caller the switch parameter
     *param = it->second;
@@ -137,12 +133,9 @@ bool CCmdLine::has_switch(string name, int* param)
     }
 
     // If we get here, the switch wasn't used on the command line
-    *param = 0;
     return false;
 }
 //==========================================================================================================
-
-
 
 
 //==========================================================================================================
@@ -160,7 +153,6 @@ bool CCmdLine::has_switch(string name, double* param)
     }
 
     // If we get here, the switch wasn't used on the command line
-    *param = 0;
     return false;
 }
 //==========================================================================================================

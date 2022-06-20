@@ -44,7 +44,6 @@ CXXFLAGS =	\
 -Wno-unused-result \
 -Wno-strict-aliasing \
 -std=c++11 \
--fpermissive \
 -fcommon \
 -I$(CPPUTILS_DIR) $(CPPFW) \
 -DLINUX 
