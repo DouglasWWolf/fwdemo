@@ -54,6 +54,13 @@ public:
     // Call this to fetch a line of text from the socket
     bool    get_line(void* buffer, size_t buff_size);
 
+    // Call these to send a string or buffer full of data
+    int     send(std::string s);
+    int     send(const void* buffer, int length);
+
+    // Call this to send data using print-style formatting
+    int     sendf(const char* fmt, ...);
+
     // Call this to close this socket.  Safe to call if socket isn't open
     void    close();
 

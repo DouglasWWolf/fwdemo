@@ -2,6 +2,7 @@
 // netsock.cpp - Implements a network socket
 //==========================================================================================================
 #include <unistd.h>
+#include <stdarg.h>
 #include <string.h>
 #include <netdb.h>
 #include <netinet/tcp.h>
@@ -371,3 +372,92 @@ bool NetSock::get_line(void* buffer, size_t buff_size)
     return true;
 }
 //==========================================================================================================
+
+
+//==========================================================================================================
+// send() - Sends a string to the other side of a connected socket
+//
+// Returns either : -1 = An error occured
+//                  Anything else = the number of bytes actually sent.  The entire string will always be
+//                  sent unless the socket was closed by the other side
+//==========================================================================================================
+int NetSock::send(string s)
+{
+    const char* p = s.c_str();
+    int length    = s.size();
+    return send(p, length);
+}
+//==========================================================================================================
+
+
+//==========================================================================================================
+// send() - Sends a buffer to the other side of a connected socket
+//
+// Returns either : -1 = An error occured
+//                  Anything else = the number of bytes actually sent.  The entire string will always be
+//                  sent unless the socket was closed by the other side
+//==========================================================================================================
+int NetSock::send(const void* buffer, int length)
+{
+    // Don't attempt to send zero bytes
+    if (length == 0) return 0;
+
+    // Get a byte pointer to the caller's buffer
+    unsigned char* ptr = (unsigned char*)buffer;
+
+    // Keep track of how many bytes remain to be sent
+    int bytes_remaining = length;
+
+    // Loop until there are no more bytes to send...
+    while (bytes_remaining)
+    {
+        // Attempt to send all of the bytes
+        int sent = ::send(m_sd, ptr, bytes_remaining, 0);
+
+        // If an error occured, tell the caller
+        if (sent < 0) return -1;
+
+        // If the socket is closed, we're done
+        if (sent == 0) break;
+
+        // Adjust the pointer and the count of bytes remaining to be sent
+        ptr             += sent;
+        bytes_remaining -= sent;
+    }
+
+    // Tell the caller how many bytes we sent
+    return (length - bytes_remaining);
+}
+//==========================================================================================================
+
+
+
+//==========================================================================================================
+// sendf() - Sends a printf-style formatt data to the the other side of a connected socket
+//
+// Returns either : -1 = An error occured
+//                  Anything else = the number of bytes actually sent.  The entire string will always be
+//                  sent unless the socket was closed by the other side
+//==========================================================================================================
+int NetSock::sendf(const char* fmt, ...)
+{
+    char buffer[2000];
+
+    // This is a pointer to the variable argument list
+    va_list ap;
+
+    // Point to the first argument after the "fmt" parameter
+    va_start(ap, fmt);
+
+    // Perform a printf of our arguments into the buffer area;
+    vsprintf(buffer, fmt, ap);
+
+    // Tell the system that we're done with the "ap"
+    va_end(ap);
+
+    // And send the buffer
+    return send(buffer, strlen(buffer));
+}
+//==========================================================================================================
+
+
