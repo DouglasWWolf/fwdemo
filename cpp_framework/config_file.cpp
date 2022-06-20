@@ -547,7 +547,7 @@ void CConfigFile::get(std::string key, std::vector<bool> *p_result)
     {
         if (m_throw_on_fail) throw runtime_error("config key '"+key+"' not found");
         return;
-    }// Call this to begin processing the next line of the script
+    }
 
     // For each string value that is associated with this key...
     for (auto& s : values)
@@ -608,7 +608,7 @@ bool CConfigScript::get_next_line(int *p_token_count, string *p_text)
 
 
 //==========================================================================================================
-// get_next_token() - Fetches the next token from the line as a string
+// get_next_token() - Fetches the next token from the current line
 //==========================================================================================================
 string CConfigScript::get_next_token(bool force_lowercase)
 {
@@ -628,9 +628,8 @@ string CConfigScript::get_next_token(bool force_lowercase)
 
 
 
-
 //==========================================================================================================
-// get_next_int() - Fetches the next token from the line as an integer
+// get_next_int() - Fetches the next integer from the current line
 //==========================================================================================================
 int32_t CConfigScript::get_next_int()
 {
@@ -652,10 +651,8 @@ int32_t CConfigScript::get_next_int()
 
 
 
-
-
 //==========================================================================================================
-// get_next_float() - Fetches the next token from the line as a double float
+// get_next_float() - Fetches the next double from the current line
 //==========================================================================================================
 double CConfigScript::get_next_float()
 {
