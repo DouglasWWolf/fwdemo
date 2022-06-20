@@ -5,8 +5,12 @@
 #include <stdarg.h>
 #include <string.h>
 #include <netdb.h>
-#include <netinet/tcp.h>
 #include <sys/ioctl.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/tcp.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include "netsock.h"
 using namespace std;
 
@@ -33,6 +37,77 @@ void NetSock::close()
     m_sd = -1;
 }
 //==========================================================================================================
+
+
+//==========================================================================================================
+// connect() - Creates the socket and connects it to a server
+//==========================================================================================================
+bool NetSock::connect(std::string server, int port)
+{
+    char ascii_port[20];
+    struct addrinfo hints, *p_res;
+
+    // The socket is not yet created
+    m_is_created = false;
+
+    // Close this socket if it happens to be open
+    close();
+
+    // Get an ASCII version of the port number
+    sprintf(ascii_port, "%i", port);
+
+    // We're going to build an IPv4/IPv6 TCP socket
+    memset(&hints, 0, sizeof hints);
+    hints.ai_family   = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    
+    // Get information about this server
+    if (getaddrinfo(server.c_str(), ascii_port, &hints, &p_res) != 0)
+    {
+        m_error_str = "no such server: "+server;
+        m_error     = NO_SUCH_SERVER;
+        return false;
+    }
+
+    // If we didn't get a result from getaddrinfo, something's wrong
+    if (p_res == nullptr)
+    {
+        m_error_str = "failure on getaddrinfo()";
+        m_error     = GETADDRINFO_FAILED;
+        return false;
+    }
+
+    // Save a copy of the results
+    struct addrinfo res = *p_res;
+
+    // Free the memory that was allocated by getaddrinfo
+    freeaddrinfo(p_res);
+
+    // Create the socket
+    m_sd = socket(res.ai_family, res.ai_socktype, res.ai_protocol);
+
+    // If the socket() call fails, complain
+    if (m_sd < 0)
+    {
+        m_error_str = "failure on socket()";
+        m_error     = SOCKET_FAILED;
+        return false;
+    }
+
+    // Attempt to connect to the server
+    if (::connect(m_sd, res.ai_addr, res.ai_addrlen) < 0)
+    {
+        m_error_str = "can't connect to "+server;
+        m_error     = GETADDRINFO_FAILED;
+        close();
+        return false;
+    }
+
+    // If we get here, we have a connected socket
+    return true;
+}
+//==========================================================================================================
+
 
 
 
@@ -459,5 +534,18 @@ int NetSock::sendf(const char* fmt, ...)
     return send(buffer, strlen(buffer));
 }
 //==========================================================================================================
+
+
+
+//==========================================================================================================
+// get_error() - Returns information about the most recent failure
+//==========================================================================================================
+int NetSock::get_error(string* p_str)
+{
+    if (p_str) *p_str = m_error_str;
+    return m_error;
+}
+//==========================================================================================================
+
 
 

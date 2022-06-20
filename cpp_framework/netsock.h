@@ -2,12 +2,8 @@
 // netsock.h - Defines a network socket
 //==========================================================================================================
 #pragma once
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>
 #include <string>
-
 
 class NetSock
 {
@@ -36,6 +32,9 @@ public:
     // Call this to listen for connections and wait for someone to connect
     bool    listen_and_accept(NetSock* new_sock = nullptr);
 
+    // Call this to connect to a server
+    bool    connect(std::string server_name, int port);
+
     // Call this to turn Nagle's algorithm on or off
     void    set_nagling(bool flag);
 
@@ -63,6 +62,9 @@ public:
 
     // Call this to close this socket.  Safe to call if socket isn't open
     void    close();
+
+    // When connect(), create() (etc) fail, this will give information about the error
+    int     get_error(std::string* p_str = nullptr);
 
 protected:
 
