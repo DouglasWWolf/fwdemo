@@ -12,7 +12,7 @@ string section = "alpha";
 // This is a complex structure
 struct complex_t {string s; bool b; double f; int32_t i;};
 
-// We're going to read all of our specs into the structure
+// We're going to read all of our specs into this structure
 struct 
 {
     int           voltage_range_lo, voltage_range_hi;
