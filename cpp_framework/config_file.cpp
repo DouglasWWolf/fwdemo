@@ -547,7 +547,7 @@ void CConfigFile::get(std::string key, std::vector<bool> *p_result)
     {
         if (m_throw_on_fail) throw runtime_error("config key '"+key+"' not found");
         return;
-    }
+    }// Call this to begin processing the next line of the script
 
     // For each string value that is associated with this key...
     for (auto& s : values)
@@ -562,5 +562,117 @@ void CConfigFile::get(std::string key, std::vector<bool> *p_result)
 //==========================================================================================================
 
 
+
+//==========================================================================================================
+// make_empty() - empties the script object of all data
+//==========================================================================================================
+void CConfigScript::make_empty()
+{
+    m_script.clear();
+    m_tokens.clear();
+    m_line_index = m_token_index = 0;
+}
+//==========================================================================================================
+
+
+
+
+//==========================================================================================================
+// get_next_line() - Fetches the next line of the script for processing
+//==========================================================================================================
+bool CConfigScript::get_next_line(int *p_token_count, string *p_text)
+{
+    // If we're out of script lines, tell the caller
+    if (m_line_index >= m_script.size())
+    {
+        if (p_text) *p_text = "";
+        return false;
+    }
+
+    // If the caller wants the script line, fill in the caller's field
+    if (p_text) *p_text = m_script[m_line_index];
+
+    // Parse this line into tokens
+    m_tokens = parse_tokens(m_script[m_line_index++].c_str());
+
+    // If the caller wants to know how many tokens there are, fill in their field
+    if (p_token_count) *p_token_count = m_tokens.size();
+
+    // The next call to "get_next_<token|int|float>" will start at the first token
+    m_token_index = 0;
+
+    // Tell the caller that their script line is available
+    return true;
+}
+//==========================================================================================================
+
+
+//==========================================================================================================
+// get_next_token() - Fetches the next token from the line as a string
+//==========================================================================================================
+string CConfigScript::get_next_token(bool force_lowercase)
+{
+    // If there are no more tokens, return an empty string
+    if (m_token_index >= m_tokens.size()) return "";
+
+    // Fetch the result string
+    string token = m_tokens[m_token_index++];
+
+    // If this caller wants this token in all lowercase, make it so
+    if (force_lowercase) make_lower(token);
+
+    // Hand the token to the caller
+    return token;
+}
+//==========================================================================================================
+
+
+
+
+//==========================================================================================================
+// get_next_int() - Fetches the next token from the line as an integer
+//==========================================================================================================
+int32_t CConfigScript::get_next_int()
+{
+    int32_t result;
+
+    // If there are no more tokens, return an empty string
+    if (m_token_index >= m_tokens.size()) return 0;
+
+    // Fetch the result string
+    string token = m_tokens[m_token_index++];
+
+    // Decode the token into an integer
+    decode(token, &result);
+
+    // Hand the result to the caller
+    return result;
+}
+//==========================================================================================================
+
+
+
+
+
+//==========================================================================================================
+// get_next_float() - Fetches the next token from the line as a double float
+//==========================================================================================================
+double CConfigScript::get_next_float()
+{
+    double result;
+
+    // If there are no more tokens, return an empty string
+    if (m_token_index >= m_tokens.size()) return 0;
+
+    // Fetch the result string
+    string token = m_tokens[m_token_index++];
+
+    // Decode the token into an double
+    decode(token, &result);
+
+    // Hand the result to the caller
+    return result;
+}
+//==========================================================================================================
 
 

@@ -7,6 +7,49 @@
 #include <stdexcept>
 #include <map>
 
+
+
+//----------------------------------------------------------------------------------------------------------
+// CConfigScript() - Provides a convenient interface for parsing script-specs in a config-file
+//----------------------------------------------------------------------------------------------------------
+class CConfigScript
+{
+public:
+
+    // After reset "get_next_line()" fetches the first line of the script
+    void        reset() {m_line_index = 0;}
+
+    // Call this to begin processing the next line of the script
+    bool        get_next_line(int *p_token_count = nullptr, std::string *p_text = nullptr);
+
+    std::string get_next_token(bool make_lower = true);
+    int32_t     get_next_int();
+    double      get_next_float();
+
+    // Call this to erase the script
+    void        make_empty();
+
+    // Overloading the '=' operator so we can assign a string vector
+    void        operator=(const std::vector<std::string> rhs) {m_script = rhs; reset();}
+
+protected:
+
+    // This is index of the next line to be fetched via "get_next_line()"
+    int         m_line_index;
+
+    // This is the index of the next token to be fetched
+    int         m_token_index;
+
+    // These are the lines of the script
+    std::vector<std::string> m_script, m_tokens;
+};
+//----------------------------------------------------------------------------------------------------------
+
+
+
+//----------------------------------------------------------------------------------------------------------
+// CConfigFile - Provides a convenient interface for reading configuration files
+//----------------------------------------------------------------------------------------------------------
 class CConfigFile
 {
 
@@ -82,6 +125,7 @@ protected:
     // Our configuration specs are a vector of spec_t objects
     std::map<std::string, strvec_t> m_specs;
 };
+//----------------------------------------------------------------------------------------------------------
 
 
 
