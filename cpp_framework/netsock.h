@@ -51,6 +51,9 @@ public:
     // Call this to receive data from the socket
     int     receive(void* buffer, int length, bool peek = false);
 
+    // Call this to fetch a line of text from the socket
+    bool    get_line(void* buffer, size_t buff_size);
+
     // Call this to close this socket.  Safe to call if socket isn't open
     void    close();
 

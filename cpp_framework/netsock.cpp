@@ -310,5 +310,64 @@ int NetSock::receive(void* buffer, int length, bool peek)
 
     // Tell the caller that we received all of the data they wanted
     return length;
- }
- //==========================================================================================================
+}
+//==========================================================================================================
+
+
+//==========================================================================================================
+// get_line() - Fetches a line of text from the socket
+//==========================================================================================================
+bool NetSock::get_line(void* buffer, size_t buff_size)
+{
+    char c;
+
+    // Don't let the caller pass us a buffer size of zero
+    if (buff_size == 0) return false;
+
+    // Reduce the buffer size by 1 to allow for appending the nul-byte to the end of it
+    --buff_size;
+
+    // We'll be keeping track of how many characters are in the buffer
+    int line_length = 0;
+
+    // Get a byte pointer to the caller's buffer
+    unsigned char* ptr = (unsigned char*) buffer;
+
+    // Loop until either an error or until we see a linefeed
+    while (true)
+    {
+        // Fetch a single byte from the socket
+        if (recv(m_sd, &c, 1, 0) < 1) return false;
+
+        // If it's a carriage-return, throw it away
+        if (c == '\r') continue;
+
+        // If it's a backspace, adjust our pointer
+        if (c == 8)
+        {
+            if (line_length)
+            {
+                --line_length;
+                --ptr;
+            }
+            continue;            
+        }
+
+        // If it's a line-feed, it's the end of the line
+        if (c == '\n') break;
+
+        // If this character will fit into the caller's buffer, append it there
+        if (line_length < buff_size)
+        {
+            *ptr++ = c;
+            line_length ++;
+        }
+    }
+
+    // We've encountered the end of the line.  Terminate the output string
+    *ptr = 0;
+
+    // And tell the caller that he has a line of data waiting in his buffer
+    return true;
+}
+//==========================================================================================================
