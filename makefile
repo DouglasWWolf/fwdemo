@@ -171,7 +171,10 @@ tarball:	clean
 # This target appends/updates the dependencies list at the end of this file
 #-----------------------------------------------------------------------------
 depend:
-	makedepend -p$(X86_OBJ_DIR)/ -Y *.cpp 2>/dev/null
+	makedepend -p$(X86_OBJ_DIR)/ -Y -I $(CPPFW) *.cpp 2>/dev/null
 
 
 # DO NOT DELETE
+
+obj_x86/main.o: cpp_framework/cthread.h cpp_framework/config_file.h
+obj_x86/test_config.o: cpp_framework/config_file.h

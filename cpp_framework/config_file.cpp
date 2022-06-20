@@ -80,7 +80,7 @@ static void cleanup(char* input)
 //==========================================================================================================
 static string parse_to_delimeter(const char* in, char delimeter)
 {
-    char token[256], *out = token;
+    char token[512], *out = token;
 
     // Skip past any leading spaces
     while (*in == ' ') ++in;
@@ -114,7 +114,7 @@ static string parse_to_delimeter(const char* in, char delimeter)
 static vector<string> parse_tokens(const char* in)
 {
     vector<string> result;
-    char           token[256];
+    char           token[512];
 
     // If we weren't given an input string, return an empty result;
     if (in == nullptr) return result;
